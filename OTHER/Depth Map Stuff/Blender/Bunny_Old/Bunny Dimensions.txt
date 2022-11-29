@@ -1,0 +1,3 @@
+Width: 0.01998 m
+Height: 0.019805 m
+Depth: 0.015486 m

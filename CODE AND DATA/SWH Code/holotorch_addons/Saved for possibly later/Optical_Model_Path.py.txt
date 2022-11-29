@@ -1,0 +1,27 @@
+from holotorch.Optical_Setups.Base_Setup import Base_Setup
+
+class Optical_Model_Path(Base_Setup):
+	def __init__(self,
+			sequence    : tuple
+			) -> None:
+		
+		super().__init__()
+
+		if not (type(sequence) is tuple):
+			sequence = (sequence,) # Convert to tuple
+
+		if (len(sequence) == 0):
+			raise Exception("Error: No components defined.")
+		
+		self.sequence = sequence
+	
+	def forward(self, input = None):
+		if (input is None):
+			field = self.sequence[0]()
+		else:
+			field = self.sequence[0](input)
+
+		for i in range(1, len(self.sequence)):
+			field = self.sequence[i](field)
+
+		return field

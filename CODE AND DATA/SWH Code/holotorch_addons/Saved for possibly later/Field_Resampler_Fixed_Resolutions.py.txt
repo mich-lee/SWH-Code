@@ -1,0 +1,115 @@
+import numpy as np
+import sys
+import torch
+from torch.nn.functional import grid_sample
+import matplotlib.pyplot as plt
+
+sys.path.append("holotorch-lib/")
+sys.path.append("holotorch-lib/holotorch")
+
+from holotorch.Spectra.SpacingContainer import SpacingContainer
+
+from holotorch.Optical_Components.CGH_Component import CGH_Component
+import holotorch.utils.Dimensions as Dimension
+from holotorch.CGH_Datatypes.ElectricField import ElectricField
+
+from HelperFunctions import generateGrid
+
+
+# IMPORTANT: DO NOT USE THIS IF YOU EXPECT MULTI-RESOLUTION INPUTS.
+class Field_Resampler_Fixed_Resolutions(CGH_Component):
+	def __init__(self,
+			inputResolution		: tuple,
+			outputResolution	: tuple,
+			inputPixelPitch		: float,
+			outputPixelPitch	: float,
+			device				: torch.device = None,
+			gpu_no				: int = 0,
+			use_cuda			: bool = False
+			) -> None:
+		
+		super().__init__()
+
+		if (device != None):
+			self.device = device
+		else:
+			self.device = torch.device("cuda:"+str(gpu_no) if use_cuda else "cpu")
+			self.gpu_no = gpu_no
+			self.use_cuda = use_cuda
+
+		if not (type(inputResolution) is tuple):
+			raise Exception("Invalid 'inputResolution'.  Should be a tuple of length 2.")
+		if (len(inputResolution) != 2):
+			raise Exception("Invalid 'inputResolution'.  Should be a tuple of length 2.")
+
+		if not (type(outputResolution) is tuple):
+			raise Exception("Invalid 'outputResolution'.  Should be a tuple of length 2.")
+		if (len(outputResolution) != 2):
+			raise Exception("Invalid 'outputResolution'.  Should be a tuple of length 2.")
+
+		if not (np.isscalar(inputPixelPitch)):
+			raise Exception("'Invalid 'inputPixelPitch'.  Should be a scalar.'")
+		if not (np.isscalar(outputPixelPitch)):
+			raise Exception("'Invalid 'outputPixelPitch'.  Should be a scalar.'")
+
+		self.inputResolution = inputResolution
+		self.outputResolution = outputResolution
+		self.inputPixelPitch = inputPixelPitch
+		self.outputPixelPitch = outputPixelPitch
+
+		inputGridX, inputGridY = generateGrid(inputResolution, inputPixelPitch, inputPixelPitch)
+		outputGridX, outputGridY = generateGrid(outputResolution, outputPixelPitch, outputPixelPitch)
+
+		self.inputGridX = inputGridX.to(device=self.device)
+		self.inputGridY = inputGridY.to(device=self.device)
+		self.outputGridX = outputGridX.to(device=self.device)
+		self.outputGridY = outputGridY.to(device=self.device)
+
+		self.calculateSampleCoordGrid()
+
+		self.grid = None
+
+
+	def calculateSampleCoordGrid(self):
+		# Can assume that coordinate (0,0) is in the center due to how generateGrid(...) works
+		xNorm = self.inputGridX.max()
+		yNorm = self.inputGridY.max()
+		gridX = self.outputGridX / xNorm
+		gridY = self.outputGridY / yNorm
+
+		grid = torch.zeros(self.outputResolution[0], self.outputResolution[1], 2)
+		grid[:,:,0] = gridX
+		grid[:,:,1] = gridY
+
+		self.gridPrototype = grid.to(device=self.device)
+	
+	
+	def forward(self, field):
+		# convert field to 4D tensor for batch processing
+		B,T,P,C,H,W = field.data.shape
+		field_data = field.data.view(B*T*P,C,H,W) # Shape to 4D
+
+		rebuildGridFlag = False
+		if (self.grid is None):
+			rebuildGridFlag = True
+		elif (torch.Size([B*T*P,H,W]) != self.grid.shape[0:3]):
+			rebuildGridFlag = True
+		
+		if (rebuildGridFlag):
+			self.grid = self.gridPrototype.repeat(B*T*P,1,1,1)
+
+		new_data_real = grid_sample(field_data.real, self.grid, mode='bilinear', padding_mode='zeros', align_corners=False)
+		new_data_imag = grid_sample(field_data.imag, self.grid, mode='bilinear', padding_mode='zeros', align_corners=False)
+		new_data = new_data_real + (1j * new_data_imag)
+		new_data = new_data.view(B,T,P,C,self.outputResolution[0],self.outputResolution[1]) # Reshape to 6D
+
+		spacing = SpacingContainer(spacing=self.outputPixelPitch)
+		spacing.set_spacing_center_wavelengths(spacing.data_tensor)
+
+		Eout = 	ElectricField(
+					data = new_data,
+					wavelengths = field.wavelengths,
+					spacing = spacing
+				)
+
+		return Eout

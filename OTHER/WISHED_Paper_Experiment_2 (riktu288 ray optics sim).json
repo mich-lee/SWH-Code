@@ -1,0 +1,255 @@
+{
+  "version": 2,
+  "objs": [
+    {
+      "type": "lens",
+      "p1": {
+        "type": 1,
+        "x": 0,
+        "y": 25.4,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 0,
+        "y": -25.4,
+        "exist": true
+      },
+      "p": "75"
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 0,
+        "y": -25.4,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 0,
+        "y": -120,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 0,
+        "y": 120,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 0,
+        "y": 25.4,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": -500,
+        "y": -120,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": -500,
+        "y": -15.9137,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": -500,
+        "y": 15.9137,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": -500,
+        "y": 120,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": 120,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": 3.456,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": -120,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": -3.456,
+        "exist": true
+      }
+    },
+    {
+      "type": "led",
+      "p1": {
+        "type": 1,
+        "x": -500,
+        "y": 0,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 0,
+        "y": 0,
+        "exist": true
+      },
+      "p": 14,
+      "symmetric": true,
+      "brightness": 1
+    },
+    {
+      "type": "beamsplitter",
+      "p1": {
+        "type": 1,
+        "x": 38.2352941,
+        "y": 12.5,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": -12.5,
+        "exist": true
+      },
+      "p": 0.5
+    },
+    {
+      "type": "mirror",
+      "p1": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": 3.456,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": -3.456,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 38.2352941,
+        "y": -12.5,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 38.2352941,
+        "y": -120,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 38.2352941,
+        "y": 12.5,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 38.2352941,
+        "y": 120,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 47.9269941,
+        "y": 12.5,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 38.2352941,
+        "y": 12.5,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 53.5435941,
+        "y": 12.5,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": 12.5,
+        "exist": true
+      }
+    },
+    {
+      "type": "blackline",
+      "p1": {
+        "type": 1,
+        "x": 38.2352941,
+        "y": -12.5,
+        "exist": true
+      },
+      "p2": {
+        "type": 1,
+        "x": 63.2352941,
+        "y": -12.5,
+        "exist": true
+      }
+    }
+  ],
+  "mode": "images",
+  "rayDensity_light": 20.085536923187668,
+  "rayDensity_images": 1,
+  "observer": {
+    "type": 5,
+    "c": {
+      "type": 1,
+      "x": 200,
+      "y": 0,
+      "exist": true
+    },
+    "r": 20,
+    "exist": true
+  },
+  "origin": {
+    "x": 956.2061739728296,
+    "y": 429.43606256993354
+  },
+  "scale": 1.2709329141645,
+  "colorMode": false
+}

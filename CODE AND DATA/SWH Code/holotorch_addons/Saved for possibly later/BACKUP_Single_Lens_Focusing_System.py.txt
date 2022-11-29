@@ -1,0 +1,74 @@
+import numpy as np
+import sys
+import torch
+import matplotlib.pyplot as plt
+
+import warnings
+
+import holotorch.utils.Dimensions as Dimensions
+from holotorch.utils.units import * # E.g. to get nm, um, mm etc.
+from holotorch.Spectra.WavelengthContainer import WavelengthContainer
+from holotorch.Spectra.SpacingContainer import SpacingContainer
+from holotorch.CGH_Datatypes.ElectricField import ElectricField
+from holotorch.utils.Enumerators import *
+from holotorch.Optical_Components.CGH_Component import CGH_Component
+
+from holotorch_addons.HelperFunctions import computeSpatialFrequencyGrids, computeBandlimitASM, computeBandlimitingFilterSpaceDomain, computeBandlimitingFilterASM, get_field_slice, print_cuda_memory_usage, fit_image_to_resolution
+from holotorch_addons.Field_Resampler import Field_Resampler
+from holotorch_addons.Thin_Lens import Thin_Lens
+from holotorch_addons.Radial_Optical_Aperture_Patched import Radial_Optical_Aperture_Patched
+from ASM_Prop_Patched import ASM_Prop_Patched
+from Field_Padder_Unpadder import Field_Padder_Unpadder
+from Fresnel_Two_Step_Prop import Fresnel_Two_Step_Prop
+
+import holotorch_addons.HolotorchPatches as HolotorchPatches
+
+########################################################################################################################
+
+class Single_Lens_Focusing_System(CGH_Component):
+	def __init__(self,
+			objectPlaneDistance : float,
+			imagePlaneDistance : float,
+			lensFocalLength : float,
+			numSamplesPerSide : int,
+			inputPlaneSampleSpacing : float,
+			outputPlaneSampleSpacing : float,
+			lensDiameter : float = np.Infinity,
+			device : torch.device = None,
+			gpu_no : int = 0,
+			use_cuda : bool = False
+		) -> None:
+		super().__init__()
+
+		if (device != None):
+			self.device = device
+		else:
+			self.device = torch.device("cuda:"+str(gpu_no) if use_cuda else "cpu")
+			self.gpu_no = gpu_no
+			self.use_cuda = use_cuda
+
+		self.objectPlaneDistance = objectPlaneDistance
+		self.imagePlaneDistance = imagePlaneDistance
+		self.lensFocalLength = lensFocalLength
+		self.lensDiameter = lensDiameter
+		self.numSamplesPerSide = numSamplesPerSide
+		self.inputPlaneSampleSpacing = inputPlaneSampleSpacing
+		self.outputPlaneSampleSpacing = outputPlaneSampleSpacing
+
+
+		self.inputResampler =	Field_Resampler(	outputHeight = numSamplesPerSide,
+													outputWidth = numSamplesPerSide,
+													outputPixel_dx = inputPlaneSampleSpacing,
+													outputPixel_dy = inputPlaneSampleSpacing,
+													device = device
+												)
+		self.prop1 = ASM_Prop_Patched(init_distance=objectPlaneDistance, do_padding=False)
+		self.lens_stop = Radial_Optical_Aperture_Patched(aperture_radius=lensDiameter/2)
+		self.lens1 = Thin_Lens(focal_length = lensFocalLength)
+		self.fresnelTwo2 = Fresnel_Two_Step_Prop(M=numSamplesPerSide, delta1=inputPlaneSampleSpacing, delta2=outputPlaneSampleSpacing, propagationDistance=imagePlaneDistance, resampleAtInput=False, device=device)
+
+		self.model = torch.nn.Sequential(self.inputResampler, self.prop1, self.lens_stop, self.lens1, self.fresnelTwo2)
+
+
+	def forward(self, field : ElectricField) -> ElectricField:
+		return self.model(field)

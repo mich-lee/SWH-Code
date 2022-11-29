@@ -1,0 +1,7 @@
+{
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}/lib/python:${env:PYTHONPATH}"
+    },
+    "python.envFile": ".env",
+    "python.analysis.extraPaths": ["holotorch-lib","holotorch_addons"]
+}

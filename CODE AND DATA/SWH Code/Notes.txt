@@ -1,0 +1,150 @@
+8/22/2022:
+	(NOTE: Patched code is available in the ASM_Prop_Patched class in the file holotorch_addons/ASM_Prop_Patched.py)
+
+It seems like the create method in CoherentSource.py ignores the 'wavelengths' input argument and just sets the wavelengths to [432 * nm, 530 * nm, 630 * nm] and the number of channels to 3.  Additionally, the dimensions seem to be automatically set to H x W = 1000 x 1400.
+This probably should not be the case.
+
+
+#################################################################################################
+
+
+In ASM_Prop.py, the lines
+	kx = torch.linspace(-1/2, 1/2, padH)
+	ky = torch.linspace(-1/2, 1/2, padW)
+would probably lead to SLIGHTLY erroneous results.  The normalized frequencies of DFT bins fall on the interval [0, 2*pi), with 2*pi NOT being one of the frequencies.  The code shown above seems to assume that they fall on the interval [0, 2*pi], where 2*pi IS included.
+However, since there are typically a lot of pixels in the height/width, the errors should typically be small.
+
+
+#################################################################################################
+
+
+8/23/2022:
+In ASM_Prop.py, if the field's Height x Width equals 64x64, the frequency grid (i.e. Kx, Ky) will not be initialized.  This is because the frequency grid is initialized in the 'shape' setter, but self.create_frequency_grid(...) does not get called if the old shape is equal to the new shape.  Because the shape is initialized to [..., 64, 64], if one's input field dimensions are 64x64, then self.create_frequency_grid(...) will not be called and the frequency grid is not initialized.  This causes an error in the create_kernel function when self.Kx is referenced as self.Kx would npt have been initialized yet.
+
+
+#################################################################################################
+
+
+9/2/2022:
+In Helper_Functions.py, the line
+	input = torch.nn.functional.pad(input, (pad_nx,pad_nx,pad_ny,pad_ny), mode='constant', value=0)
+should be changed to
+	input = torch.nn.functional.pad(input, (pad_ny,pad_ny,pad_nx,pad_nx), mode='constant', value=0)
+This is because using (pad_nx,pad_nx,pad_ny,pad_ny) tells the function to pad pad_nx to the y dimensions and pad_ny to the x dimensions
+
+
+#################################################################################################
+
+
+9/2/2022:
+	(NOTE: Patched code is available in the SLM_PhaseOnly_Patched and Modulator_Container_Patched class in the file holotorch_addons/HolotorchPatches.py)
+
+In Modulator_Container.py, if store_on_gpu is set to True, the self.values field might not be initialized.  Thus, the code could potentially try to access that uninitialized field and throw an error.
+For example, if an SLM_PhaseOnly object (it extends Modulator_Container.py) is initialized with store_on_gpu=False, and then one calls visualize_slm(...) on that object, an error will occur on the following line in Modulator_Container.py:
+	img1 = self.values.data_tensor[sub_batch_idx,:,:,x0:x1,y0:y1].squeeze()
+(Addendum 9/3/2022) Same will also happen if one tries to call load_all_slms_from_folder(...) after initializing.
+(Addendum 9/3/2022) Might be worth noting that in the code's current state, if one uses the SLM_PhaseOnly.create_slm(...) method to create a SLM_PhaseOnly object, there is no way that store_on_gpu can be True.
+
+
+#################################################################################################
+
+
+9/5/2022:
+In CoordinateSystemCombiner, the lines:
+	min_dx = dx_center.min()
+	min_dy = dx_center.min()
+might possibly be in error.  Additionally, these lines:
+	new_wavelengths, _ = wavelengths.max(axis=1)
+        WavelengthContainer(
+            wavelengths=new_wavelengths,
+            tensor_dimension=new_tensor_dimension,
+            center_wavelength = intensity.wavelengths.center_wavelength
+            )
+
+        # After resizing the physical size in x-dimension and y-dimension should be the same
+        # NOTE: This is only true if there has been a full FFT involved
+        # assert size_x_mm == size_y_mm
+        
+        output = IntensityField(
+                data = data,
+                wavelengths = new_wavelengths,
+                spacing = new_spacing
+            )
+might give undesirable results.  A WavelengthContainer object is created but never used.  new_wavelengths ends up being a tensor, which means that the wavelengths field of the returned output is a tensor.  As far as I can tell, that field should be a WavelengthContainer.  Since the rest of the Holotorch library seems to assume that the wavelengths field of field objects is a WavelengthContainer, having the wavelengths field be a tensor instead could potentially cause errors.
+
+
+#################################################################################################
+
+
+9/8/2022:
+There were a number of bugs in the Modulator_Container class.  Among other bugs, the class would save the same SLM data in multiple files.  I tried to work around the bugs in the Modulator_Container_Patched class found in the file holotorch_addons/HolotorchPatches.py.
+
+
+#################################################################################################
+
+
+9/9/2022:
+	(NOTE: Patched code is available in the ASM_Prop_Patched class in the file holotorch_addons/ASM_Prop_Patched.py)
+
+In the ASM_Prop class, the code DOES NOT do zero padding when linear_conv = True, and DOES zero padding when linear_conv = False.  Additionally, the default value for linear_conv is True.  This means that by default, no zero padding is performed---this means that circular convolution will be performed by default in the forward(...) method.
+
+I am not sure if circular convolution should be performed when linear_conv = True, as it seems like it should be the opposite.
+
+Additionally, in the forward(...) method of the ASM_Prop class--regardless of what linear_conv is set to---if the pad_size argument in the ASM_Prop constructor is not given or set to None, then NO PADDING IS DONE.  This is because pad_size defaults to None and pad_size = None results in pad_size being set to torch.tensor([0, 0]) on line 52.  This causes pad_x and pad_y in the lines
+	if not self.linear_conv:
+		padW, padH = self.compute_pad_size(H,W)
+		pad_x = int((padH - H)/2)
+		pad_y = int((padW - W)/2)
+		field_data = pad(field_data, (pad_x,pad_x,pad_y, pad_y), mode='constant', value=pad_val)
+to be zero, thus resulting in no padding occurring.
+(ADDENDUM 9/13/2022:
+	The last line should be field_data = pad(field_data, (pad_y, pad_y, pad_x, pad_x), mode='constant', value=pad_val)
+due to how the pad function works.)
+
+There are also issues with signs on phases in the ASM_Prop class.  Specifically, it does not seem like a consistent sign convention is being used for the ASM kernel.  Note the following lines in the create_kernel(...) method:
+	# compute ASM kernel on the fly for the right wavelengths
+	K_lambda = 2*np.pi /  wavelengths_TC # T x C x H x W
+	K_lambda_2 = K_lambda**2  # T x C x H x W
+	  .
+	  .
+	  .
+	if self.prop_kernel_type is ENUM_PROP_KERNEL_TYPE.PARAXIAL_KERNEL:
+		# avoid sqrt operation
+		ang = self.z * K_lambda[:,:,None,None] + self.z/(2*K_lambda)*K2 # T x C x H x W
+	elif self.prop_kernel_type is ENUM_PROP_KERNEL_TYPE.FULL_KERNEL:
+		ang = - self.z * torch.sqrt(K_lambda_2 - K2) # T x C x H x W
+		if ang.is_complex():
+			ang = ang.real
+Equations 4.22-4.23 in "Digital Holographic Microscopy: Principles, Techniques, and Applications" by Myung K. Kim (2011?) and Equations 4.20-4.22 in the 3rd edition of Joseph Goodman's Fourier Optics book seem to imply that the code for the phase angle under the paraxial approximation should be
+	ang = self.z * K_lambda[:,:,None,None] - self.z/(2*K_lambda)*K2
+instead of what is in the code.
+Furthermore, the aforementioned equations also seem to indicate that the sign on the phase angle for the "full kernel" (i.e. ASM kernel without approximations) should be opposite from what it is in the code (assuming that one uses the same time phasor sign convention as the Goodman book, i.e. time phasors of the form e^{-j\omega t}---see section 4.2.1 in Goodman's Fourier Optics book [3rd edition] for more details on sign conventions).
+So if one wants to use the same sign convention, then one should probably have this line instead:
+	ang = self.z * torch.sqrt(K_lambda_2 - K2)
+(As an aside, inconsistency in sign conventions seems to be what caused the thin lens implementation in the Tocohpy to not work with the ASM class.)
+
+
+#################################################################################################
+
+
+9/15/2022:
+	(NOTE: Patched code is available in the Radial_Optical_Aperture_Patched class in the file holotorch_addons/Radial_Optical_Aperture_Patched.py)
+In the Radial_Optical_Aperture class, the centering of the aperture is off.  The class will also give an error when the input field is on the GPU due to the grids defaulting to being on the CPU.
+
+When calling ElectricField.visualize(...) with flag_axis set to true, the point field.data[...,0,0] will be displayed in the upper left corner.  If generating a meshgrid, it is likely that that point will correspond to the point (x ∈ negative reals, y ∈ negative reals).  However, if that convention is used, then the plot's axis labels will be inconsistent with that.
+
+
+#################################################################################################
+
+
+10/5/2022:
+The cmap option in Light.py's visualize(...) method does not work.  It is unused in that method, so it does not get passed to anything.
+Since ElectricField.py's visualize(...) method ultimately calls Light.py's method to plot, the non-functionality of the cmap option in Light.py also makes that option non-functional in ElectricField.py.
+(I would assume that fixing that bug in Light.py will fix the issue in ElectricField.py.  ElectricField.py seems to pass the cmap argument when it calls Light.py's visualize(...) method.)
+
+
+#################################################################################################
+
+
+10/12/2022:
+The 'distance' parameter in the FT_Lens class does not appear to do anything.

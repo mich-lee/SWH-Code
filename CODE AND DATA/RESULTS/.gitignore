@@ -1,0 +1,3 @@
+# Prevents large *.pt and *.stl files from being committed and filling up the repo
+*.pt
+*.stl

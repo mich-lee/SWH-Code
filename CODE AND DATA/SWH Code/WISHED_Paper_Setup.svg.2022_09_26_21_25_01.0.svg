@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="750mm"
+   height="300mm"
+   viewBox="0 0 750 300"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2 (dc2aedaf03, 2022-05-15)"
+   sodipodi:docname="WISHED_Paper_Setup.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="0.3325"
+     inkscape:cx="1529.3233"
+     inkscape:cy="634.58647"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       units="mm"
+       spacingx="0.99999998"
+       spacingy="0.99999998"
+       enabled="true"
+       type="xygrid"
+       id="grid9"
+       originx="499.99999"
+       originy="150"
+       empspacing="5" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 150 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="750 : 150 : 1"
+       inkscape:persp3d-origin="375 : 100 : 1"
+       id="perspective105974" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:0.2, 0.2;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 0,150 H 749.99997"
+       id="path1749"
+       sodipodi:insensitive="true" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.5833px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="499.99997"
+       y="177"
+       id="text1812"><tspan
+         sodipodi:role="line"
+         id="tspan1810"
+         style="stroke-width:0.264583" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1;font-family:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-dasharray:none"
+       x="600.00043"
+       y="184.11482"
+       id="text1866"><tspan
+         sodipodi:role="line"
+         id="tspan1864"
+         style="font-weight:bold;font-size:4.23333px;text-align:center;text-anchor:middle;fill:#00ffff;stroke:#000000;stroke-width:0.2;stroke-dasharray:none;stroke-opacity:1"
+         x="600.00043"
+         y="184.11482">LENS</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="600.00043"
+         y="188.34814"
+         id="tspan3322">Thorlabs AC508-075-B-ML</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="600.00043"
+         y="192.58148"
+         id="tspan1868">D = 50.8mm</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="600.00043"
+         y="196.81482"
+         id="tspan4050">f = 75.0mm</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1;font-family:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-dasharray:none"
+       x="663.00043"
+       y="168.14192"
+       id="text1866-1"><tspan
+         sodipodi:role="line"
+         id="tspan1864-8"
+         style="font-weight:bold;font-size:4.23333px;text-align:center;text-anchor:middle;fill:#ffcc00;fill-opacity:1;stroke:#001a00;stroke-width:0.2;stroke-dasharray:none;stroke-opacity:1"
+         x="663.00043"
+         y="168.14192">SLM</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="663.00043"
+         y="172.37524"
+         id="tspan3322-8">HOLOEYE LETO-3</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="663.00043"
+         y="176.60858"
+         id="tspan104316">Dimensions = 12.288x6.912 (mm)</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="663.00043"
+         y="180.84192"
+         id="tspan1868-1">Resolution = 1920x1080 (pixels)</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="663.00043"
+         y="185.07524"
+         id="tspan104312">Pixel Pitch = 6.4µm</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1;font-family:sans-serif;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-dasharray:none"
+       x="710.00043"
+       y="160"
+       id="text1866-1-0"><tspan
+         sodipodi:role="line"
+         id="tspan1864-8-8"
+         style="font-weight:bold;font-size:4.23333px;text-align:center;text-anchor:middle;fill:#c8beb7;stroke:#000000;stroke-width:0.2;stroke-dasharray:none;stroke-opacity:1"
+         x="710.00043"
+         y="160">IMAGE SENSOR</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="710.00043"
+         y="164.23334"
+         id="tspan3322-8-9">Basler Ace</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="710.00043"
+         y="168.46666"
+         id="tspan105072">Dimensions = 7.4444x5.6166 (mm)</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="710.00043"
+         y="172.69998"
+         id="tspan1868-1-1">Resolution = 4024x3036</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:2.11667px;text-align:center;text-anchor:middle;stroke-width:0.2;stroke-dasharray:none"
+         x="710.00043"
+         y="176.93332"
+         id="tspan4050-3-7">Pixel Pitch = 1.85µm</tspan></text>
+    <circle
+       style="fill:#000000;fill-opacity:1;stroke-width:0.112;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path101917"
+       cx="675.00043"
+       cy="150"
+       r="0.69999999" />
+    <rect
+       style="fill:#ffcc00;fill-opacity:1;stroke:#000000;stroke-width:0.2;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect103062"
+       width="0.799999"
+       height="6.9119992"
+       x="-663.63544"
+       y="146.54401"
+       ry="1.1826249e-05"
+       transform="scale(-1,1)" />
+    <rect
+       style="fill:#c8beb7;fill-opacity:1;stroke:#000000;stroke-width:0.2;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect103256"
+       width="0.79999882"
+       height="5.6165981"
+       x="687.83569"
+       y="147.1917"
+       ry="4.3244407e-05" />
+    <rect
+       style="fill:#00ffff;fill-opacity:1;stroke:#000000;stroke-width:0.2;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect103419"
+       width="1.599999"
+       height="50.799999"
+       x="599.20044"
+       y="124.6"
+       ry="7.822585e-05" />
+    <g
+       sodipodi:type="inkscape:box3d"
+       id="g105976"
+       style="fill:#00ffff;fill-opacity:1;stroke:#000000;stroke-width:0.755906;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       inkscape:perspectiveID="#perspective105974"
+       inkscape:corner0="0.22950826 : 0.00081966967 : 0 : 1"
+       inkscape:corner7="0.071428624 : 0.076785714 : 0.15289406 : 1">
+      <path
+         sodipodi:type="inkscape:box3dside"
+         id="path105988"
+         style="fill:#e9e9ff;fill-rule:evenodd;stroke:none;stroke-linejoin:round"
+         inkscape:box3dsidetype="11"
+         d="m 354.21711,185.57599 45.7351,4.59343 v -62.04741 l -45.7351,2.50178 z"
+         points="399.95221,190.16942 399.95221,128.12201 354.21711,130.62379 354.21711,185.57599 " />
+      <path
+         sodipodi:type="inkscape:box3dside"
+         id="path105978"
+         style="fill:#353564;fill-rule:evenodd;stroke:none;stroke-linejoin:round"
+         inkscape:box3dsidetype="6"
+         d="m 304.99999,190 v -61.78571 l 49.21712,2.4095 v 54.9522 z"
+         points="304.99999,128.21429 354.21711,130.62379 354.21711,185.57599 304.99999,190 " />
+      <path
+         sodipodi:type="inkscape:box3dside"
+         id="path105986"
+         style="fill:#afafde;fill-rule:evenodd;stroke:none;stroke-linejoin:round"
+         inkscape:box3dsidetype="13"
+         d="m 304.99999,128.21429 45,-3.21429 49.95222,3.12201 -45.7351,2.50178 z"
+         points="349.99999,125 399.95221,128.12201 354.21711,130.62379 304.99999,128.21429 " />
+      <path
+         sodipodi:type="inkscape:box3dside"
+         id="path105980"
+         style="fill:#4d4d9f;fill-rule:evenodd;stroke:none;stroke-linejoin:round"
+         inkscape:box3dsidetype="5"
+         d="m 304.99999,190 45,5.90164 49.95222,-5.73222 -45.7351,-4.59343 z"
+         points="349.99999,195.90164 399.95221,190.16942 354.21711,185.57599 304.99999,190 " />
+      <path
+         sodipodi:type="inkscape:box3dside"
+         id="path105984"
+         style="fill:#d7d7ff;fill-rule:evenodd;stroke:none;stroke-linejoin:round"
+         inkscape:box3dsidetype="14"
+         d="M 349.99999,195.90164 V 125 l 49.95222,3.12201 v 62.04741 z"
+         points="349.99999,125 399.95221,128.12201 399.95221,190.16942 349.99999,195.90164 " />
+      <path
+         sodipodi:type="inkscape:box3dside"
+         id="path105982"
+         style="fill:#8686bf;fill-rule:evenodd;stroke:none;stroke-linejoin:round"
+         inkscape:box3dsidetype="3"
+         d="m 304.99999,190 45,5.90164 V 125 l -45,3.21429 z"
+         points="349.99999,195.90164 349.99999,125 304.99999,128.21429 304.99999,190 " />
+    </g>
+  </g>
+</svg>

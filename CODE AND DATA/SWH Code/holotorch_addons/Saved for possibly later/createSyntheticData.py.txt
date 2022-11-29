@@ -1,0 +1,227 @@
+import numpy as np
+import sys
+import torch
+import matplotlib.pyplot as plt
+
+from numpy import asarray
+import gc	# For garbage collection/freeing up memory
+
+# Image wranglers
+import imageio
+from PIL import Image
+
+import warnings
+
+sys.path.append("holotorch-lib/")
+sys.path.append("holotorch-lib/holotorch")
+sys.path.append("AdditionalCode/")
+
+# import holotorch
+import holotorch.utils.Dimensions as Dimensions
+from holotorch.utils.units import * # E.g. to get nm, um, mm etc.
+# from holotorch.LightSources.CoherentSource import CoherentSource
+from holotorch.Spectra.WavelengthContainer import WavelengthContainer
+from holotorch.Spectra.SpacingContainer import SpacingContainer
+from holotorch.CGH_Datatypes.ElectricField import ElectricField
+from holotorch.Optical_Propagators.ASM_Prop import ASM_Prop
+from holotorch.utils.Enumerators import *
+from holotorch.Optical_Components.FT_Lens import FT_Lens
+
+from AdditionalCode.Thin_Lens import Thin_Lens
+
+#############################################################################################################
+
+simulationDimensions = (3036, 4024) # WISHED paper: (3036,4024)						# Size of simulation in pixels; (height,width)
+spacing = 1.85*um # WISHED paper: 1.85*um											# Spacing between pixels
+# wavelengthsArray = [432 * nm, 530 * nm, 630 * nm]		# Wavelengths
+# wavelengthsArray = [532 * nm]
+wavelengthsArray = [1 * um]
+
+lensFocalLength = 75 * mm
+objectPlaneDistance = 50 * cm
+imagePlaneDistance = 88.23529414 * mm
+
+inputImageFileame = 'northwestern.png'					# The red channel of the image determines depth, the green channel controls how much each point reflects
+inputImageDepthRange = 1 * mm # For teapot: (0.5*4/6.4)*(884)*spacing
+
+##GPU info for pytorch##
+gpu_no = 0
+use_cuda = True
+device = torch.device("cuda:"+str(gpu_no) if use_cuda else "cpu")
+
+
+#################################################################
+# Miscellaneous setup
+#################################################################
+numChannels = len(wavelengthsArray)
+
+wavelengths = WavelengthContainer(
+			wavelengths = wavelengthsArray,
+			tensor_dimension = Dimensions.C(n_channel=numChannels)
+)
+wavelengths = wavelengths.to(device)
+
+simulationAspectRatio = simulationDimensions[1] / simulationDimensions[0]
+imageMagnification = 1 # imageMagnification = lensFocalLength / (lensFocalLength - objectPlaneDistance)
+inputFieldDimensions = (np.int(np.ceil(simulationDimensions[0] / np.abs(imageMagnification))), np.int(np.ceil(simulationDimensions[1] / np.abs(imageMagnification))))
+
+xCoords = torch.linspace(-((simulationDimensions[0] - 1) // 2), (simulationDimensions[0] - 1) // 2, simulationDimensions[0])
+yCoords = torch.linspace(-((simulationDimensions[1] - 1) // 2), (simulationDimensions[1] - 1) // 2, simulationDimensions[1])
+xGrid, yGrid = torch.meshgrid(xCoords, yCoords)
+
+
+#################################################################
+# Loading in image data for generating synthetic data
+#################################################################
+inputImage = Image.fromarray(imageio.imread(inputImageFileame))
+inputImageAspectRatio = inputImage.size[0] / inputImage.size[1]
+
+aspectRatioMismatchFlag = False
+if (simulationAspectRatio == inputImageAspectRatio):
+	inputImage = inputImage.resize((inputFieldDimensions[1], inputFieldDimensions[0]))
+elif (inputImageAspectRatio < simulationAspectRatio):
+	# Width relatively undersized so should resize to match height
+	aspectRatioMismatchFlag = True # Set a warning flag
+	imageMag = inputFieldDimensions[0] / inputImage.size[1]	# = (Input field height) / (Input image height)
+	imageMagWidth = np.int(np.floor(inputImage.size[0] * imageMag)) # = floor((Input image width) * imageMag)
+	resizedImageData = np.asarray(inputImage.resize((imageMagWidth, inputFieldDimensions[0]))) # Resize input image to match input field's height, then convert image to array
+	paddingOffset = (inputFieldDimensions[1] - imageMagWidth) // 2 # Calculate how much more width the input field has relative to the input image, divide that number by 2, and round down
+	paddedImageData = np.zeros([inputFieldDimensions[0], inputFieldDimensions[1], resizedImageData.shape[2]]) # Initialize new array for image data (array indices represent height, width, and color/alpha channels respectively)
+	paddedImageData[:,paddingOffset:(paddingOffset+imageMagWidth),:] = resizedImageData # Put resizedImageData array into paddedImageData, with the resizedImageData array being centered in the width dimension
+	inputImage = Image.fromarray(paddedImageData.astype(np.uint8)) # Convert paddedImageData to an image object
+else:
+	# Height relatively undersized so should resize to match width
+	aspectRatioMismatchFlag = True # Set a warning flag
+	imageMag = inputFieldDimensions[1] / inputImage.size[0]	# = (Input field width) / (Input image width)
+	imageMagHeight = np.int(np.floor(inputImage.size[1] * imageMag)) # = floor((Input image height) * imageMag)
+	resizedImageData = np.asarray(inputImage.resize((inputFieldDimensions[1], imageMagHeight))) # Resize input image to match input field's width, then convert image to array
+	paddingOffset = (inputFieldDimensions[0] - imageMagHeight) // 2 # Calculate how much more height the input field has relative to the input image, divide that number by 2, and round down
+	paddedImageData = np.zeros([inputFieldDimensions[0], inputFieldDimensions[1], resizedImageData.shape[2]]) # Initialize new array for image data (array indices represent height, width, and color/alpha channels respectively)
+	paddedImageData[paddingOffset:(paddingOffset+imageMagHeight),:,:] = resizedImageData # Put resizedImageData array into paddedImageData, with the resizedImageData array being centered in the height dimension
+	inputImage = Image.fromarray(paddedImageData.astype(np.uint8)) # Convert paddedImageData to an image object
+
+if (simulationAspectRatio != inputImageAspectRatio):
+	warningMsgAspectRatioMismatch = "WARNING: The input image for the synthetic data has a different aspect ratio than the simulation dimensions.  The input image was resized and zero padded."
+	warnings.warn(warningMsgAspectRatioMismatch)
+	print(warningMsgAspectRatioMismatch)
+
+
+# Using float16 to save space (the numbers being worked with range from 0-255 so the limited range of float16 is not an issue)
+inputImage = torch.tensor(np.array(inputImage), dtype=torch.float16, device=device)
+
+
+depthChannel = inputImage[:,:,0] / 255
+reflectanceChannel = inputImage[:,:,1] / 255
+
+# Clearing 'inputImage' from memory as it can sometimes get very large and is not needed after this point
+del(inputImage)
+gc.collect()
+
+depths = depthChannel - torch.min(depthChannel.abs())
+if (torch.max(depths.abs()) != 0):
+	depths = depths / torch.max(depths.abs())
+else:
+	depths[:,:] = 1
+depths = inputImageDepthRange * (1 - depths)
+
+depths = 0.8*(1 - (depths / inputImageDepthRange)) + 0.2
+depths[depthChannel.abs() == depthChannel.abs().min()] = 0
+depths = inputImageDepthRange * (1 - depths)
+
+# Clearing 'depthChannel' from memory as it can sometimes get very large and is not needed after this point
+del(depthChannel)
+gc.collect()
+
+pass
+
+
+
+field_data = torch.zeros(1, 1, 1, numChannels, inputFieldDimensions[0], inputFieldDimensions[1], dtype=torch.cfloat, device=device)
+
+# field_data[None,None,None,None,:,:] = reflectanceChannel * (1 - (depths / inputImageDepthRange))
+
+wavelengths_TC  = wavelengths.data_tensor.view(wavelengths.tensor_dimension.get_new_shape(new_dim=Dimensions.BTPCHW))
+wavelengths_TC  = wavelengths_TC[:,:,None,None] # Expand wavelengths for H and W dimension
+field_data[None,None,None,None,:,:] = reflectanceChannel * torch.exp(1j*2*np.pi*depths/wavelengths_TC)
+
+
+# Clearing 'reflectanceChannel' from memory as it can sometimes get very large and is not needed after this point
+del(reflectanceChannel)
+gc.collect()
+
+
+
+
+#################################################################
+# Doing stuff
+#################################################################
+field_input = ElectricField(
+	data = field_data,
+	wavelengths = wavelengths,
+	spacing = spacing,
+)
+
+# This is kinda hacky
+field_input.spacing.data_tensor = field_input.spacing.data_tensor.to(device)
+
+
+asm_prop1 = ASM_Prop(
+	init_distance = objectPlaneDistance,
+)
+thinLens = Thin_Lens(focal_length = lensFocalLength)
+# ftLens = FT_Lens(focal_length = 75 * mm)
+asm_prop2 = ASM_Prop(
+	init_distance = imagePlaneDistance,
+)
+
+lensInputField = asm_prop1(field_input)
+lensOutputField = thinLens(lensInputField)
+imagePlaneField = asm_prop2(lensOutputField)
+
+# imagePlaneFieldCleaned = imagePlaneField.data
+# imagePlaneFieldCleaned[(imagePlaneField.data.abs() < 0.02*imagePlaneField.data.abs().max())] = 0
+# imagePlaneFieldCleaned = ElectricField(data = imagePlaneFieldCleaned, wavelengths=wavelengths, spacing=spacing)
+
+# bbb0 = ftLens(field_input)
+# aaa2 = thinLens(field_input)
+
+# plotType = ENUM_PLOT_TYPE.PHASE
+plt.figure(figsize=(10,10))
+plt.subplot(241)
+field_input.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.MAGNITUDE)
+plt.title("Input field magnitude")
+plt.subplot(245)
+field_input.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.PHASE)
+plt.title("Input field phase")
+plt.subplot(242)
+lensInputField.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.MAGNITUDE)
+plt.title("Lens input magnitude")
+plt.subplot(246)
+lensInputField.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.PHASE)
+plt.title("Lens input phase")
+plt.subplot(243)
+lensOutputField.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.MAGNITUDE)
+plt.title("Lens output magnitude")
+plt.subplot(247)
+lensOutputField.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.PHASE)
+plt.title("Lens output phase")
+plt.subplot(244)
+imagePlaneField.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.MAGNITUDE)
+plt.title("Image plane magnitude")
+plt.subplot(248)
+imagePlaneField.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.PHASE)
+plt.title("Image plane phase")
+# plt.subplot(248)
+# imagePlaneFieldCleaned.visualize(rescale_factor = 0.25,flag_colorbar=True, flag_axis=True, plot_type=ENUM_PLOT_TYPE.PHASE)
+# plt.title("Image plane phase (cleaned)")
+
+
+# source = CoherentSource.create(
+#     height      = 1000,
+#     width       = 1400,
+#     spacing     = 8 * um,
+#     wavelengths = wavelengths,
+# )
+# aaa1 = source() # Let's look at the output of our source
+
+pass

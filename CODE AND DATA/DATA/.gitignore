@@ -1,0 +1,2 @@
+# Prevents large *.pt files from being committed and filling up the repo
+*.pt

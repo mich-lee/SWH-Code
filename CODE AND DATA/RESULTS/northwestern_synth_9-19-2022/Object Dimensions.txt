@@ -1,0 +1,3 @@
+Height: 6.658 mm
+Width: 4.219 mm
+Depth: 1.000 mm
