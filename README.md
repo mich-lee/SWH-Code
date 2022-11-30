@@ -1,3 +1,5 @@
+![Electric Field Bunny](/ElectricFieldBunny.gif?raw=true "Electric Field Bunny")
+
 # Overview
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This repository contains some work I did pertaining to synthetic wavelength holography (SWH) and phase retrieval.  The initial objective of this work was to use [Holotorch](https://github.com/facebookresearch/holotorch) [1]—*a Fourier optics/coherent imaging library*—to implement a subset[^1] of the processing described in [2] and [3].  More specifically, the model-based phase retrieval process described in [2] and [3] was implemented.  Additionally, synthetic wavelength holography from [2] was also implemented.  **_The code can be found in the folder ```CODE AND DATA/SWH Code/```._**  Please be aware though that that the code/comments/documentation for the code is, in some places, rather unpolished.
@@ -34,7 +36,6 @@ The SWH code (found in ```CODE AND DATA/SWH Code/```) is broken up into a handfu
      - Median filtering is performed to remove spikes in depth data
      - Then, Gaussian kernel (filter) is applied (see Section 4.2 in [2])
 
-&nbsp;
 #### Other Notes
 1. Some of the aforementioned scripts have code for plotting in them (some commented, some uncommented)
 2. ```plotDataBlahAsdf.py``` contains additional plotting code
@@ -43,11 +44,11 @@ The SWH code (found in ```CODE AND DATA/SWH Code/```) is broken up into a handfu
 
 # Fourier Optics/Coherent Imaging Libraries Utilized
 ### [Holotorch](https://github.com/facebookresearch/holotorch) [1]
-The SWH code in this repository relies heavily on Holotorch.  Holotorch was used to create models for various optical systems.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The SWH code in this repository relies heavily on Holotorch.  Holotorch was used to create models for various optical systems.
 
 
 ### [Tocohpy](https://github.com/lfiske1/Tocohpy/tree/master) [4]
-Tocohpy was the precursor to Holotorch, and some code from Tocohpy was carried over to Holotorch.  Before I obtained access to Holotorch, I implemented phase retrieval using Tocohpy models.  The code for that can be found in the folder ```SWH/OTHER/Tocohpy Test/```.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tocohpy was the precursor to Holotorch, and some code from Tocohpy was carried over to Holotorch.  Before I obtained access to Holotorch, I implemented phase retrieval using Tocohpy models.  The code for that can be found in the folder ```SWH/OTHER/Tocohpy Test/```.
 
 &nbsp;
 
@@ -58,17 +59,22 @@ Tocohpy was the precursor to Holotorch, and some code from Tocohpy was carried o
 
 &nbsp;
 
-&nbsp;
+# Extra Stuff
+- A Blender file for generating input images for the synthetic data generator code can be found at ```SWH/OTHER/Depth Map Stuff/Blender/Input_Image_Creator.blend```
+  - More information about these input images can be found in 
 
 &nbsp;
 
+# Miscellaneous Notes
+- Some data is missing from the ```CODE AND DATA/DATA/``` and ```CODE AND DATA/RESULTS``` folders.  This is because certain files were large and would have taken up too much storage on Github.
+  - If you would like some of the missing data, please contact me via email.  My email is listed near the end of this README.
 
+&nbsp;
 
-
-# Contact
+# Contact Information
 **Email:** ```MichaelLee2023@u.northwestern.edu```
 
-
+&nbsp;
 
 # References
 
@@ -79,6 +85,8 @@ Tocohpy was the precursor to Holotorch, and some code from Tocohpy was carried o
 3.	Y. Wu, M. K. Sharma, and A. Veeraraghavan, “WISH: Wavefront imaging sensor with high resolution,” Light: Science & Applications, vol. 8, no. 1, 2019.
 
 4. L. Fiske, “LFISKE1/Tocohpy at master,” GitHub. [Online]. Available: <https://github.com/lfiske1/Tocohpy/tree/master>. [Accessed: 29-Nov-2022].
+
+5. J. C. Maxwell, “On Physical Lines of Force,” The Scientific Papers of James Clerk Maxwell, 1861. 
 
 &nbsp;
 
